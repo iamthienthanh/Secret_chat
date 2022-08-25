@@ -1,11 +1,26 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
-import { registerRoute } from '../utils/APIRoutes';
+import { registerRoute, keepLoginRoute } from '../utils/APIRoutes';
 const Register = () => {
+    const navigate = useNavigate()
+    useEffect(() => {
+        const keepLogin = async () => {
+            let user_info = JSON.parse(localStorage.getItem('user'));
+            const username = user_info.username;
+            const password = user_info.password;
+            const {data} = await axios.post(keepLoginRoute, {
+                username, password
+            })
+            if (data.success === true) {
+                navigate('/')
+            }
+        }
+        keepLogin()
+    },[])
     const [inputValue, setInputValue] = useState({
         username: "",
         email:"",
@@ -15,10 +30,17 @@ const Register = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (handleValidate()) {
-        const {username, email, password, confirmPassword} = inputValue
+            const {username, email, password, confirmPassword} = inputValue
             const {data} = await axios.post(registerRoute, {
                 username, email, password
             })
+            if (data.success === true) {
+                toast.success(data.message, toastOptions)
+                localStorage.setItem('user', JSON.stringify(data.data))
+                navigate('/')
+            } else {
+                toast.error(data.message, toastOptions)
+            }
         }
     }
     const handleChange = (event) => {

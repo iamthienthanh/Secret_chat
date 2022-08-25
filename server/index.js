@@ -10,6 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+import authRoute from './route/auth.js'
 
 mongoose.connect(process.env.MONGO_URI)
 const db = mongoose.connection
@@ -17,9 +18,7 @@ db.on('error', () => console.error('MongoDB connection error'))
 db.once('open', () => console.log('Connected to MongoDB successfully'))
 
 
-app.get('/', (req, res) => {
-    res.send('Welcome');
-})
+app.use('/api/auth',authRoute);
 
 const port = process.env.PORT || 8000;
 app.listen(port, () => {
